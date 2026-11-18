@@ -1,0 +1,9 @@
+{
+  "grid_id": "cheng-an-riverbank",
+  "origin": [0, 0],
+  "spacing": [1, 1],
+  "elevations": [[2, -1, 2], [-1, 2, 2]],
+  "correction": [[3, 0, 2], [-1, 2, 2]],
+  "level": 0,
+  "sheets": {"left": [0, 0, 1, 1], "right": [0, 1, 1, 2]}
+}
