@@ -1,7 +1,7 @@
 from collections import defaultdict
 from collections.abc import Iterator, Sequence
 
-from sheet.edge_contacts import BoundaryContact, Point
+from sheet.edge_contacts import BoundaryContact
 from sheet.packet import CellComponent
 
 
@@ -15,21 +15,22 @@ def contacts_intersect(left: BoundaryContact, right: BoundaryContact) -> bool:
     )
 
 
-def _junction_keys(component: CellComponent) -> set[Point]:
-    return {
-        contact.start for contact in component.contacts
-        if all(value.denominator == 1 for value in contact.start)
-    }
+def _components_touch(left: CellComponent, right: CellComponent) -> bool:
+    return any(
+        contacts_intersect(first, second)
+        for first in left.contacts
+        for second in right.contacts
+    )
 
 
 def iter_contact_links(components: Sequence[CellComponent]) -> Iterator[tuple[int, int]]:
     by_cell = defaultdict(list)
     for index, component in enumerate(components):
-        by_cell[component.cell].append((index, _junction_keys(component)))
-    for (row, column), entries in by_cell.items():
+        by_cell[component.cell].append(index)
+    for (row, column), indices in by_cell.items():
         for row_offset, col_offset in _FORWARD_NEIGHBORS:
             neighbor = row + row_offset, column + col_offset
-            for left, left_keys in entries:
-                for right, right_keys in by_cell.get(neighbor, ()):
-                    if left_keys & right_keys:
+            for left in indices:
+                for right in by_cell.get(neighbor, ()):
+                    if _components_touch(components[left], components[right]):
                         yield left, right
